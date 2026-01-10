@@ -158,4 +158,3 @@ export default Intro_react;
 // Allows component-based design → scalable, maintainable apps.
 
 // Handles weird edge cases and performance optimization internally.
-
