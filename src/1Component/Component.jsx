@@ -34,7 +34,7 @@ export default Component;
 // 2. File extension use .jsx with vite it occurs errors if use App.js
 
 // 3. Do not write return keyword like this
-//  --- return 
+//  --- return
 //  (                                ---- it will give an error
 //     <div>hello</div>
 //   )
@@ -48,10 +48,10 @@ export default Component;
 //     </>
 //   )
 
-// 5. Components are reusable which means the same Component repeats with the same UI by calling it multiple times like 
-// <App/> 
-// <App/> 
-// <App/> 
+// 5. Components are reusable which means the same Component repeats with the same UI by calling it multiple times like
+// <App/>
+// <App/>
+// <App/>
 
 // 6. Components must be created, exported, imported, and called.
 
@@ -69,10 +69,44 @@ export default Component;
 
 // * remember Default export is only one in one js file.
 
-// and for named export and import 
+// and for named export and import
 
 // -=====> like export {func1, func2, func3};
 // -=====> import {func1, func2 , func3} from "./app.js"
 
 
+// 🔁 Lifecycle vs Hooks Mapping Table
+// 🧱 Class Components → 🧩 Function Components
+
+// ┌───────────────────────────────┬───────────────────────────────┬──────────────────────────────┐
+// │ Class Lifecycle Method        │ When it runs                  │ Hook Equivalent              │
+// ├───────────────────────────────┼───────────────────────────────┼──────────────────────────────┤
+// │ constructor                   │ Before first render          │ useState / useRef             │
+// │                               │                              │ (initialization)              │
+// │ render                        │ Calculate UI                 │ Function body                 │
+// │ componentDidMount             │ After first DOM commit        │ useEffect(() => {}, [])       │
+// │ componentDidUpdate            │ After updates                │ useEffect(() => {}, [deps])   │
+// │ componentWillUnmount          │ Before removal               │ useEffect cleanup             │
+// │                               │                              │ return () => {}               │
+// │ shouldComponentUpdate         │ Skip re-render                │ React.memo / useMemo          │
+// │ getDerivedStateFromProps      │ Sync state from props         │ useState during render        │
+// │ getSnapshotBeforeUpdate       │ Before DOM mutations         │ useLayoutEffect               │
+// │ componentDidCatch             │ Catch errors                 │ Error Boundaries (class only) │
+// └───────────────────────────────┴───────────────────────────────┴──────────────────────────────┘
+
+// 🧩 Timing Breakdown (Critical)
+// RENDER PHASE
+// - function body
+// - useState
+// - useMemo
+// - useCallback
+
+// COMMIT PHASE
+// - DOM updates
+// - useLayoutEffect
+
+// AFTER PAINT
+// - useEffect
+
+// This timing is more important than lifecycle names.
 
