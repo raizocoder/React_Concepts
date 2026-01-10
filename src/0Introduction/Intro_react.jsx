@@ -6,7 +6,6 @@ const Intro_react = () => {
 
 export default Intro_react;
 
-
 // 1. What is React ?
 // React is free open source frontend library for building User interfaces by using a component based architecture.
 // React library focus only on UI part.
@@ -18,18 +17,31 @@ export default Intro_react;
 // There are some blocks of code which are built by html CSS JavaScript and same section repeated multiple time at multiple places  so react is component based architecture which provides us facility to built same sections multiple time only by calling the component just like calling a function.
 
 // --- Maintable code ---
+
 // As react provides us component building  facility and it is easier for us to separate code bases in separate component and it will easy to track and debug the code.
 
 // --- single page applications ---
+
+//A Single Page Application in React is a web app where only one HTML page is loaded, and React updates the UI dynamically without reloading the page.
+
+// Browser loads one HTML file Usually: index.html
+
+// This file has:
+
+// <div id="root"></div
+
 // Previous websites are built by multiple elements and multiple elements have multiple children and it creates nested dom tree , so when this type dom tree parse into browser it loads slowly and whenever go to other page and route it would refresh the whole page  again, here is react is best for it because react application built the website by using only single element with single JavaScript page which loads faster into browser and does not refresh by changing into other page.
 
 // --- Hooks ---
+
 // Sometimes in pure Html CSS JavaScript we built application and declare some data in UI and in Js file as variable but both data are same and both are changing by using add event listener like counter app and digital clock, so react  provides us Hooks feature for easier the code writing like useState use for Declare a variable and provide a function with it to modify variable value and same variable name is use in UI part also. There are more hooks in react and each hooks has its own feature to fast and efficient the code writing.
 
 // --- Virtual DOM ---
+
 // React uses Virtual DOM  for changing in  UI part as with pure JavaScript file if change in single element it refresh whole page so in react application if any changes occurs first changes in Virtual DOM then compare with Real DOM and changes only in target element instead of refreshing the whole page.
 
 // 3. Structure of React library ?
+
 // React library is Build by two major vanilla JavaScript libraries  that is one is react which has 3000 js lines of code and other is react-dom which has 30,000 js lines of code and react and react-dom has uses other libraries in it thats why whenever you install react and react-dom both it has many folders and files already in it.
 
 // react library --- createElement, props, hooks etc
@@ -44,7 +56,6 @@ export default Intro_react;
 // Developed by Facebook in 2013 and widely adopted for modern web development.
 
 // React allows developers to build UIs as reusable components, making development modular and maintainable.
-
 
 // 2️⃣ Why React Exists – Problems it Solves
 
@@ -119,7 +130,6 @@ export default Intro_react;
 // | Developer Tools      | Debugging & Performance   | Inspect component tree, state, and props.         |
 // |                      | issues                    | Allows tracing re-renders and optimizing UI.       |
 // +----------------------+---------------------------+------------------------------------------------------+
-
 
 // ✅ Takeaways:
 
