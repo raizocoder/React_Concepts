@@ -43,6 +43,11 @@
 
 // Describe UI → Find changes → Schedule work → Commit DOM → Handle events
 
+// Short answer (the fact)
+
+// React does NOT compare the Real DOM with the Virtual DOM.
+// React compares the old Fiber tree with the new Fiber tree.
+
 // +++All React Internals+++
 
 // 1. React describes UI
