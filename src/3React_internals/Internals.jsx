@@ -1242,179 +1242,237 @@
 // React hooks rules exist to protect the Fiber’s internal hook state. Fiber stores hooks in a list per component, incremented in call order. Violating the rules (conditional hooks, loops, or non-component calls) breaks the mapping between hook calls and Fiber slots, causing state mismatches and rendering bugs, especially in concurrent mode.
 
 
-// <script>
-//   /* ============================================================
-//      STEP -1: JSX Authoring (Developer Experience)
-//      ------------------------------------------------------------
-//      - Developer writes JSX syntax
-//      - Browser does NOT understand JSX
-//      - React does NOT receive JSX directly
-//   ============================================================ */
+// 🟢 LEVEL 1 — High-Level Mental Terminal
+// ┌──────────────────────────────┐
+// │       YOUR REACT CODE        │
+// │  JSX + Components + Hooks    │
+// └──────────────┬───────────────┘
+//                ↓
+// ┌──────────────────────────────┐
+// │   JSX → createElement()      │
+// │   (Compile Time via Babel)   │
+// └──────────────┬───────────────┘
+//                ↓
+// ┌──────────────────────────────┐
+// │     React Element Tree       │
+// │   (Plain JS Objects)         │
+// └──────────────┬───────────────┘
+//                ↓
+// ┌──────────────────────────────┐
+// │        Fiber Tree            │
+// │   (State + Effects + Links)  │
+// └──────────────┬───────────────┘
+//                ↓
+// ┌──────────────────────────────┐
+// │        Render Phase          │
+// │   (Diff + Reconciliation)    │
+// └──────────────┬───────────────┘
+//                ↓
+// ┌──────────────────────────────┐
+// │        Commit Phase          │
+// │   (DOM Mutation + Effects)   │
+// └──────────────┬───────────────┘
+//                ↓
+// ┌──────────────────────────────┐
+// │        Browser DOM           │
+// │   (Painted UI)               │
+// └──────────────────────────────┘
 
-//   /* ============================================================
-//      STEP 0: Babel Transpilation (Compile-Time Step)
-//      ------------------------------------------------------------
-//      INTERNALS:
-//      - Babel parses JSX into an AST
-//      - JSX is transformed into React.createElement calls
-//      - This happens BEFORE React runtime executes
-//      - Babel is NOT part of React
-//      - Output is plain JavaScript
-     
-//      Example:
-//        <h1>Hello React!</h1>
-//      becomes:
-//        React.createElement("h1", null, "Hello React!")
-//   ============================================================ */
+// 🟢 LEVEL 2 — JSX → Element (Terminal Trace)
+// $ JSX detected
+// $ Babel compiling...
 
-//   /* ============================================================
-//      STEP 1: React Element Creation (Virtual DOM node)
-//      ------------------------------------------------------------
-//      INTERNAL STRUCTURE:
-//      {
-//        $$typeof: Symbol(react.element),
-//        type: "h1",
-//        key: null,
-//        ref: null,
-//        props: { children: "Hello React!" },
-//        _owner: null
-//      }
-//   ============================================================ */
+// <App name="Rohit" />
 
-//   const heading = React.createElement(
-//     "h1",
-//     null,
-//     "Hello React!"
-//   );
+// ↓ transpiles to ↓
 
-//   /* ============================================================
-//      STEP 2: Browser loads React & ReactDOM (via CDN)
-//      ------------------------------------------------------------
-//      INTERNALS:
-//      - Fiber reconciler initialized
-//      - Scheduler initialized
-//      - DOM host config registered
-//      - Event system set up
-//   ============================================================ */
+// React.createElement(App, { name: "Rohit" })
 
-//   /* ============================================================
-//      STEP 3: Select the root DOM container
-//      ------------------------------------------------------------
-//      - Real DOM node
-//      - Root attachment point
-//   ============================================================ */
+// $ createElement() called
+// $ Creating ReactElement object
 
-//   const container = document.getElementById("root");
+// {
+//   $$typeof: Symbol(react.element),
+//   type: App,
+//   key: null,
+//   ref: null,
+//   props: { name: "Rohit" }
+// }
 
-//   /* ============================================================
-//      STEP 4: Create a React Root (React 18+)
-//      ------------------------------------------------------------
-//      INTERNALS CREATED:
-//      - FiberRootNode
-//      - HostRoot Fiber
-//      - Lane map (priorities)
-//      - Root update queue
-//      - Concurrent rendering enabled
-//   ============================================================ */
 
-//   const root = ReactDOM.createRoot(container);
+// 📌 Still NO DOM
 
-//   /* ============================================================
-//      STEP 5: Schedule render work
-//      ------------------------------------------------------------
-//      INTERNAL FLOW:
-//      - root.render() creates an Update object
-//      - Lane assigned (Sync / Default)
-//      - Update enqueued on root
-//      - Scheduler notified
-//   ============================================================ */
+// 🟢 LEVEL 3 — Element Tree Creation
+// $ Building element tree...
 
-//   root.render(heading);
+// App (element)
+//  └── h1 (element)
+//      └── "Hello Rohit"
 
-//   /* ============================================================
-//      STEP 6: Scheduler (Task Prioritization)
-//      ------------------------------------------------------------
-//      INTERNALS:
-//      - Lanes determine priority
-//      - Time slicing possible
-//      - Work may pause/resume
-//   ============================================================ */
+// $ Element tree ready
+// $ Handing off to reconciler...
 
-//   /* ============================================================
-//      STEP 7: Render Phase (Reconciliation)
-//      ------------------------------------------------------------
-//      INTERNAL MECHANICS:
-//      - beginWork() creates child fibers
-//      - compare against current fibers
-//      - Pure, interruptible phase
-//      - No DOM mutations
-//   ============================================================ */
+// 🟢 LEVEL 4 — Fiber Tree Creation (CORE ENGINE)
+// $ Creating Fiber Nodes...
+// $ Attaching state & hooks...
+// $ Linking parent / child / sibling...
 
-//   /* ============================================================
-//      STEP 8: Fiber Node Structure
-//      ------------------------------------------------------------
-//      Fiber {
-//        tag,
-//        type,
-//        key,
-//        stateNode,
-//        return,
-//        child,
-//        sibling,
-//        memoizedProps,
-//        pendingProps,
-//        lanes,
-//        flags
-//      }
-//   ============================================================ */
+// FiberRoot
+//  └── AppFiber
+//      └── h1Fiber
+//          └── textFiber("hello")
 
-//   /* ============================================================
-//      STEP 9: Complete Phase
-//      ------------------------------------------------------------
-//      INTERNALS:
-//      - completeWork()
-//      - Prepare DOM nodes
-//      - Bubble effect flags upward
-//      - Finalize effect list
-//   ============================================================ */
 
-//   /* ============================================================
-//      STEP 10: Commit Phase (Non-interruptible)
-//      ------------------------------------------------------------
-//      SUB-PHASES:
-//      1. Before Mutation
-//      2. Mutation (DOM updates)
-//      3. Layout (useLayoutEffect)
-//   ============================================================ */
+// Each fiber internally:
 
-//   /* ============================================================
-//      STEP 11: DOM Mutation (Host Config)
-//      ------------------------------------------------------------
-//      INTERNALS:
-//      - createInstance()
-//      - createTextInstance()
-//      - appendInitialChild()
-//      - commitPlacement()
-//   ============================================================ */
+// fiber = {
+//   type,             // Component or DOM tag
+//   key,
+//   stateNode,        // DOM node or component instance
+//   child,
+//   sibling,
+//   return,           // parent
+//   memoizedState,    // hooks state
+//   updateQueue,
+//   flags,            // side-effects
+//   lanes             // priority
+// }
 
-//   /* ============================================================
-//      STEP 12: Passive Effects Phase
-//      ------------------------------------------------------------
-//      INTERNALS:
-//      - useEffect callbacks executed
-//      - Runs AFTER browser paint
-//   ============================================================ */
 
-//   /* ============================================================
-//      STEP 13: Browser Paint
-//      ------------------------------------------------------------
-//      - Layout calculation
-//      - Paint
-//      - Composite
-//      - Pixels shown on screen
-//   ============================================================ */
+// 🟢 LEVEL 5 — Render Phase (Calculation Only)
+// $ ===== RENDER PHASE START =====
+// $ Render is interruptible
+// $ No DOM allowed
 
-// </script>
+// Step-by-step traversal
+// → Visiting Fiber: App
+// → Executing function App()
+// → Running hooks
+// → Returned JSX
+
+// → Visiting Fiber: h1
+// → Comparing with previous fiber
+// → Marking UPDATE flag
+
+// $ Fiber flags set:
+//   • Placement
+//   • Update
+//   • Deletion
+
+// $ ===== RENDER PHASE END =====
+
+
+// 📌 UI NOT updated yet
+
+// 🟢 LEVEL 6 — Scheduler & Priority (Advanced)
+// $ Scheduling update...
+// $ Priority Lane: USER_INPUT
+// $ Time slicing enabled
+
+// $ Yielding control to browser...
+// $ Resuming work...
+
+
+// 📌 React can pause / resume / restart
+
+// 🟢 LEVEL 7 — Commit Phase (DOM Mutation)
+// $ ===== COMMIT PHASE START =====
+// $ This phase is NOT interruptible
+
+// 1️⃣ Before Mutation
+// $ getSnapshotBeforeUpdate()
+
+// 2️⃣ Mutation Phase
+// $ Creating DOM nodes
+// $ Updating attributes
+// $ Removing old nodes
+
+// DOM OP:
+//   <h1>Hello Rohit</h1>
+
+// 3️⃣ Layout Effects
+// $ Running useLayoutEffect()
+
+// 4️⃣ Browser Paint
+// $ Browser painting pixels...
+
+// 5️⃣ Passive Effects
+// $ Running useEffect()
+
+// $ ===== COMMIT PHASE END =====
+
+// 🟢 LEVEL 8 — State Update Terminal Flow
+// User clicks button
+// ↓
+// setCount(1)
+// ↓
+// Create update object
+// ↓
+// Push into hook queue
+// ↓
+// Mark fiber dirty
+// ↓
+// Schedule render
+// ↓
+// Repeat render → commit
+
+// 🟢 LEVEL 9 — Concurrent Rendering (Hidden Reality)
+// $ Starting render...
+// $ New high priority update arrived!
+// $ Aborting current render
+// $ Restarting with latest state
+
+
+// 📌 Render may run multiple times
+
+// 🟢 LEVEL 10 — Strict Mode (DEV Only)
+// $ StrictMode enabled
+// $ Double invoking render()
+// $ Double invoking effects()
+// $ Checking purity...
+
+
+// 📌 Helps catch bugs early
+
+// 🟢 LEVEL 11 — Full One-Screen Master Diagram 🧠
+// JSX
+//  ↓
+// createElement()
+//  ↓
+// React Element (Object)
+//  ↓
+// Fiber Node (State + Hooks)
+//  ↓
+// Work-In-Progress Fiber Tree
+//  ↓
+// Render Phase (Diff + Flags)
+//  ↓
+// Scheduler (Priority + Time Slice)
+//  ↓
+// Commit Phase
+//    ├─ DOM Mutation
+//    ├─ useLayoutEffect
+//    ├─ Browser Paint
+//    └─ useEffect
+//  ↓
+// Updated UI
+
+// 🏆 FINAL MENTAL MODEL (REMEMBER THIS)
+// Render = THINKING
+// Commit = DOING
+
+
+// React:
+
+// Thinks a lot
+
+// Touches DOM very little
+
+// Re-thinks often
+
+// Commits once
+
+
 
 // 1️⃣ Complete React Render Pipeline (One View)
 // JSX
@@ -1432,4 +1490,360 @@
 // Commit Phase
 //  ↓
 // DOM + Effects
+
+
+// 🖥️ Fiber Node — Internal Data Structure
+// 1️⃣ Fiber Node Concept
+
+// Fiber = unit of work in React
+// Each component / DOM node = one Fiber
+
+// Fiber is a plain JS object, stored in a linked tree (parent, child, sibling).
+
+// Fiber Lifecycle Connections
+
+// FiberRootNode
+//  ├─ current → points to current committed tree
+//  └─ workInProgress → points to tree being built
+
+
+
+// fiber = {
+//   type,              // Component type (function, class, or DOM tag)
+//   key,               // Key for list reconciliation
+//   ref,               // Ref object (if any)
+//   stateNode,         // DOM node or class instance
+//   return,            // Parent fiber
+//   child,             // First child fiber
+//   sibling,           // Next sibling fiber
+//   index,             // Child index in parent
+//   memoizedProps,     // Last rendered props
+//   pendingProps,      // New props to render
+//   memoizedState,     // Last rendered state/hooks
+//   updateQueue,       // Queue of pending state updates
+//   effectTag,         // Flags (Placement / Update / Deletion)
+//   nextEffect,        // Next fiber with side effect
+//   firstEffect,       // First child effect
+//   lastEffect,        // Last child effect
+//   lanes,             // Priority lanes for scheduler
+//   childLanes,        // Aggregated lanes of children
+//   alternate          // Link to fiber of previous render (current ↔ workInProgress)
+//   index: 0
+// }
+
+// 🖥️ Default Fiber Structure (Template)
+
+// Every Fiber in React has a standard set of fields. Here’s the default structure:
+
+// const FiberNode = {
+//   // 1️⃣ Identification
+//   type: null,             // Component type: function/class/string (host component)
+//   key: null,              // Optional key for reconciliation
+//   elementType: null,      // Original element type (may differ from type with memo, forwardRef)
+//   stateNode: null,        // Actual DOM node (host fiber) or component instance (class fiber)
+  
+//   // 2️⃣ Tree structure
+//   return: null,           // Parent fiber
+//   child: null,            // First child fiber
+//   sibling: null,          // Next sibling fiber
+//   index: 0,               // Position among siblings
+
+//   // 3️⃣ Props & State
+//   pendingProps: null,     // New props for next render
+//   memoizedProps: null,    // Last rendered props
+//   memoizedState: null,    // Hook state (linked list of hooks)
+//   updateQueue: null,      // Queue of pending updates (setState / useReducer)
+  
+//   // 4️⃣ Effect tracking
+//   effectTag: NoFlags,     // What needs to be done in commit phase (Placement / Update / Deletion / Passive)
+//   nextEffect: null,       // Next fiber in effect list
+//   firstEffect: null,      // First child in effect list
+//   lastEffect: null,       // Last child in effect list
+  
+//   // 5️⃣ Scheduling
+//   lanes: NoLane,          // Priority of this fiber update
+//   childLanes: NoLane,     // Aggregate lanes of children
+  
+//   // 6️⃣ Double buffering (alternate fiber)
+//   alternate: null,        // Reference to alternate fiber for current ↔ workInProgress
+  
+//   // 7️⃣ Debug & other internal
+//   _debugID: 0,            // DEV only, optional for profiling
+//   _debugSource: null,     // JSX source info
+//   _debugOwner: null,      // Fiber that created this one
+// };
+
+
+// Example Code
+
+// function App() {
+//   return <h1>Hello Rohit</h1>;
+// }
+
+// 1️⃣ Fiber Tree — Visual
+// FiberRootNode
+//  └─ AppFiber (FunctionComponent <App>)
+//       └─ H1Fiber (HostComponent <h1>)
+
+
+// FiberRootNode → Root of all fibers (container div in DOM)
+
+// AppFiber → Function component <App>
+
+// H1Fiber → Host component <h1> (actual DOM node)
+
+// 2️⃣ Fiber Structure — Step by Step
+// 🔹 FiberRootNode
+// FiberRootNode = {
+//   current: AppFiber,         // Committed tree
+//   workInProgress: AppFiber,  // Tree being built during render
+//   containerInfo: rootDiv,    // Actual DOM container
+//   pendingLanes: NoLane       // Pending updates
+// }
+
+
+// Role: Entry point of the React app, manages current vs workInProgress fibers.
+
+// 🔹 AppFiber — Function Component <App>
+// AppFiber = {
+//   type: App,                  // Function component
+//   key: null,
+//   stateNode: null,            // Function component → null
+//   return: FiberRootNode,      // Parent fiber
+//   child: H1Fiber,             // First child fiber
+//   sibling: null,              // No sibling
+//   pendingProps: {},           // Props passed to App
+//   memoizedProps: {},          // Last rendered props
+//   memoizedState: null,        // Hooks linked list (none in this example)
+//   updateQueue: null,          // setState updates (none)
+//   effectTag: Placement,       // Needs to be placed in DOM
+//   nextEffect: H1Fiber,        // Next fiber in effect list
+//   firstEffect: H1Fiber,       // First effect in subtree
+//   lastEffect: H1Fiber,        // Last effect in subtree
+//   lanes: SyncLane,            // Scheduler priority
+//   childLanes: NoLane,         // Aggregate child lanes
+//   alternate: null             // Alternate fiber (for concurrency)
+// }
+
+
+// Role:
+
+// Runs component function <App>
+
+// Creates child fiber for <h1>
+
+// Part of effect list for DOM placement
+
+// 🔹 H1Fiber — Host Component <h1>
+// H1Fiber = {
+//   type: 'h1',                 // Host component → renders actual DOM node
+//   key: null,
+//   stateNode: h1DOMNode,       // <h1> DOM node
+//   return: AppFiber,           // Parent fiber
+//   child: null,                // No children (text node is primitive)
+//   sibling: null,              // No sibling
+//   pendingProps: { children: 'Hello Rohit' }, // New render props
+//   memoizedProps: { children: 'Hello Rohit' }, // Last rendered props
+//   memoizedState: null,        // No hooks
+//   updateQueue: null,          // No updates
+//   effectTag: Placement,       // Place this DOM node
+//   nextEffect: null,           // End of effect list
+//   firstEffect: null,
+//   lastEffect: null,
+//   lanes: SyncLane,            // Priority lane
+//   childLanes: NoLane,
+//   alternate: null
+// }
+
+
+// Role:
+
+// Leaf fiber → renders actual <h1> DOM node
+
+// Stores DOM reference in stateNode
+
+// Part of effect list to commit placement in DOM
+
+// 🖥️ Combined Nested Fiber Tree — <App> + <h1>
+
+// FiberRootNode
+//  ├─ current → AppFiber (committed tree)
+//  └─ workInProgress → building tree
+//       └─ AppFiber (FunctionComponent <App>)
+//            ├─ type: App
+//            ├─ key: null
+//            ├─ stateNode: null             // Function component → null
+//            ├─ return: FiberRootNode
+//            ├─ child: H1Fiber(Starts here)
+//            ├─ sibling: null
+//            ├─ pendingProps: {}
+//            ├─ memoizedProps: {}
+//            ├─ memoizedState: null
+//            ├─ updateQueue: null
+//            ├─ effectTag: Placement         // Needs to commit
+//            ├─ nextEffect: H1Fiber
+//            ├─ firstEffect: H1Fiber
+//            ├─ lastEffect: H1Fiber
+//            ├─ lanes: SyncLane
+//            ├─ childLanes: NoLane
+//            └─ alternate: null
+
+//            └─ H1Fiber (HostComponent <h1>)
+//                 ├─ type: 'h1'
+//                 ├─ key: null
+//                 ├─ stateNode: h1DOMNode       // Actual <h1> DOM
+//                 ├─ return: AppFiber
+//                 ├─ child: null                // Text primitive, no child fiber
+//                 ├─ sibling: null
+//                 ├─ pendingProps: { children: 'Hello Rohit' }
+//                 ├─ memoizedProps: { children: 'Hello Rohit' }
+//                 ├─ memoizedState: null
+//                 ├─ updateQueue: null
+//                 ├─ effectTag: Placement
+//                 ├─ nextEffect: null            // End of effect list
+//                 ├─ firstEffect: null
+//                 ├─ lastEffect: null
+//                 ├─ lanes: SyncLane
+//                 ├─ childLanes: NoLane
+//                 └─ alternate: null
+
+// 🔹 Mental Mapping (Side-by-Side)
+
+// [Old Fiber]                      [Work-in-Progress Fiber]
+// AppFiber                          AppFiber (wip)
+//   └─ child → H1Fiber                └─ child → H1Fiber (wip)
+//        └─ stateNode <h1 DOM>           └─ stateNode <h1 DOM> (reused)
+//        └─ props: 'Hello Rohit'         └─ pendingProps: 'Hello World'
+//        └─ effectTag: NoFlags           └─ effectTag: Update
+
+// 🖥️🔥 MEGA FULL-WIDTH REACT TERMINAL PIPELINE
+
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                                  YOUR CODE                                    │
+// │                        <App /> + <Header /> + <Button />                      │
+// └──────────────────────────────────────────────────────────────────────────────┘
+//                                        ↓
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                            Babel / JSX compile                                 │
+// │   <App /> → React.createElement(App, props)                                    │
+// │   Returns immutable ReactElement objects { type, props, key, ref }            │
+// └──────────────────────────────────────────────────────────────────────────────┘
+//                                        ↓
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                          React Element Tree                                    │
+// │ Immutable, plain JS objects: { type, props, key, ref }                         │
+// │ Cheap to compare, no side effects                                             │
+// └──────────────────────────────────────────────────────────────────────────────┘
+//                                        ↓
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                                Fiber Tree                                      │
+// │ Mutable, linked tree: child / sibling / return                                 │
+// │ Double buffering: current ↔ workInProgress                                     │
+// │ Each Fiber = unit of work with state/hooks/effects                             │
+// └──────────────────────────────────────────────────────────────────────────────┘
+//                                        ↓
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                            Fiber Node Example                                  │
+// │ AppFiber                                                                         │
+// │ ├─ type: FunctionComponent                                                      │
+// │ ├─ memoizedProps: {…}                                                          │
+// │ ├─ pendingProps: {…}                                                           │
+// │ ├─ memoizedState → hook1 → hook2                                               │
+// │ ├─ updateQueue: [setState(1)]                                                  │
+// │ ├─ effectTag: Update                                                            │
+// │ ├─ lanes: InputLane                                                             │
+// │ ├─ child → HeaderFiber                                                          │
+// │ ├─ sibling → FooterFiber                                                        │
+// │ ├─ return → FiberRootNode                                                       │
+// │ └─ alternate → currentFiber                                                     │
+// └──────────────────────────────────────────────────────────────────────────────┘
+//                                        ↓
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                               Hooks Internal                                  │
+// │ AppFiber.memoizedState                                                           │
+// │ ├─ hook1: useState                                                              │
+// │ │   memoizedState: 0                                                            │
+// │ │   queue: pending updates                                                      │
+// │ │   next → hook2                                                                │
+// │ ├─ hook2: useEffect                                                             │
+// │ │   create: fetchData()                                                         │
+// │ │   destroy: cleanupFn                                                          │
+// │ │   deps: [url]                                                                │
+// │ │   next → null                                                                │
+// └──────────────────────────────────────────────────────────────────────────────┘
+//                                        ↓
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                               Render Phase                                     │
+// │ Think Phase: Diff & Reconcile                                                  │
+// │ 1. Traverse Fiber Tree                                                          │
+// │ 2. Execute component function                                                  │
+// │ 3. Execute hooks in order                                                      │
+// │ 4. Compute next children / diff                                               │
+// │ 5. Compare with memoizedProps/state                                           │
+// │ 6. Set effectTag flags                                                         │
+// │ 7. Build effect list (firstEffect → lastEffect)                                │
+// │ 8. Scheduler yields if time runs out (concurrent rendering)                    │
+// └──────────────────────────────────────────────────────────────────────────────┘
+//                                        ↓
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                           Scheduler / Lanes                                    │
+// │ Priority lanes: Sync / Input / Default / Idle                                   │
+// │ Time-slicing & yield control                                                   │
+// │ High-priority updates may interrupt low-priority ones                          │
+// │ Example:                                                                       │
+// │ setCount() → InputLane                                                          │
+// │ fetchData() → DefaultLane                                                       │
+// │ startTransition() → IdleLane                                                   │
+// └──────────────────────────────────────────────────────────────────────────────┘
+//                                        ↓
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                           Effect List / Flags                                   │
+// │ Only fibers with effectTag ≠ NoFlags                                           │
+// │ firstEffect → HeaderFiber → AppFiber → ButtonFiber → lastEffect                │
+// │ EffectTag examples: Placement, Update, Deletion, Passive, Ref, Snapshot       │
+// └──────────────────────────────────────────────────────────────────────────────┘
+//                                        ↓
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                              Commit Phase                                      │
+// │ Do Phase: Atomic / Blocking Phase                                             │
+// │ 1. Before Mutation: getSnapshotBeforeUpdate                                   │
+// │ 2. Mutation Phase: DOM insertion / update / deletion                          │
+// │    Example: <h1>Hello Rohit</h1> created                                      │
+// │ 3. Layout Effects: useLayoutEffect()                                          │
+// │    Runs synchronously before paint                                            │
+// │ 4. Browser Paint: pixels rendered                                             │
+// │ 5. Passive Effects: useEffect()                                               │
+// │    Runs asynchronously after paint                                            │
+// └──────────────────────────────────────────────────────────────────────────────┘
+//                                        ↓
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                              DOM / UI Updated                                  │
+// │ UI fully rendered & interactive                                               │
+// └──────────────────────────────────────────────────────────────────────────────┘
+//                                        ↓
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                           Re-render / Update Queue                             │
+// │ setState() / props / context triggers                                          │
+// │ Fiber marked dirty → schedule render                                           │
+// │ High-priority interrupts lower-priority work                                   │
+// │ Fiber double buffer: current ↔ workInProgress                                  │
+// └──────────────────────────────────────────────────────────────────────────────┘
+//                                        ↓
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                         Strict Mode (DEV Only)                                  │
+// │ Double render of functions & effects                                           │
+// │ Detect impure render / memory leaks                                            │
+// │ Concurrent / interrupted render may run multiple times                         │
+// └──────────────────────────────────────────────────────────────────────────────┘
+//                                        ↓
+// ┌──────────────────────────────────────────────────────────────────────────────┐
+// │                             Hidden / Weird Internals                            │
+// │ - Render may be discarded                                                      │
+// │ - Effects run only after commit                                                 │
+// │ - useMemo / useCallback caches references only                                  │
+// │ - Context updates re-render all consumers                                      │
+// │ - DOM updates batched                                                          │
+// │ - Scheduler yields to browser to prevent jank                                  │
+// └──────────────────────────────────────────────────────────────────────────────┘
+
 
