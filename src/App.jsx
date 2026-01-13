@@ -1,8 +1,8 @@
-import React from "react";
+import Counter from "./5UseState/Counter";
 const App = () => {
   return (
     <>
-      <h1>hello world</h1>
+      <Counter/>
     </>
   );
 };
