@@ -1416,5 +1416,20 @@
 
 // </script>
 
-
+// 1️⃣ Complete React Render Pipeline (One View)
+// JSX
+//  ↓
+// createElement
+//  ↓
+// Element Tree
+//  ↓
+// Fiber Tree
+//  ↓
+// Render Phase
+//  ↓
+// Scheduler
+//  ↓
+// Commit Phase
+//  ↓
+// DOM + Effects
 
