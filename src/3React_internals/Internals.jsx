@@ -283,11 +283,12 @@
 // 👉 React DOM answers: “Apply changes now”
 
 // Full Pipeline (One View)
-// JSX
+
+//  → JSX
 //  → React.createElement (describe UI)
 //  → Virtual DOM
-//  → Reconciler (diffing)
 //  → Fiber (split work)
+//  → Reconciler (diffing)
 //  → Scheduler (prioritize)
 //  → Commit Phase
 //  → Browser DOM
@@ -295,8 +296,8 @@
 // | Step       | Role           | Technique                     |
 // | ---------- | -------------- | ----------------------------- |
 // | React      | Describe UI    | Declarative UI, Virtual DOM   |
-// | Reconciler | Find changes   | Diffing algorithm             |
-// | Fiber      | Manage work    | Fiber data structure          |
+// |  Fiber     |  Manage work   |  Fiber data structure         |
+// | Reconciler | Find changes   |   Diffing algorithm           |
 // | Scheduler  | Set priority   | Time slicing, priority queues |
 // | React DOM  | Update browser | Commit phase DOM mutations    |
 
@@ -849,9 +850,8 @@
 //      ------------------------------------------------------------
 //      - Real DOM node
 //      - Root attachment point
+//   ==> const container = document.getElementById("root");
 //   ============================================================ */
-
-//   const container = document.getElementById("root");
 
 //   /* ============================================================
 //      STEP 4: Create a React Root (React 18+)
@@ -862,9 +862,8 @@
 //      - Lane map (priorities)
 //      - Root update queue
 //      - Concurrent rendering enabled
+//   ==> const root = ReactDOM.createRoot(container);  
 //   ============================================================ */
-
-//   const root = ReactDOM.createRoot(container);
 
 //   /* ============================================================
 //      STEP 5: Schedule render work
@@ -874,9 +873,8 @@
 //      - Lane assigned (Sync / Default)
 //      - Update enqueued on root
 //      - Scheduler notified
+//   ==> root.render(heading);
 //   ============================================================ */
-
-//   root.render(heading);
 
 //   /* ============================================================
 //      STEP 6: Scheduler (Task Prioritization)

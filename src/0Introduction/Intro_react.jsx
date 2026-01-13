@@ -267,9 +267,9 @@ export default Intro_react;
 //      ------------------------------------------------------------
 //      - This is the real DOM element controlled by React
 //      - React will attach its Fiber tree here
+//      - const container = document.getElementById("root");
 //   ============================================================ */
-//   const container = document.getElementById("root");
-
+//   
 //   /* ============================================================
 //      STEP 3: Create a React Root (React 18+ API)
 //      ------------------------------------------------------------
@@ -277,8 +277,8 @@ export default Intro_react;
 //      - Enables Concurrent Rendering
 //      - Sets up internal Scheduler
 //      - Prepares a root Fiber node (HostRoot)
+//      - const root = ReactDOM.createRoot(container);
 //   ============================================================ */
-//   const root = ReactDOM.createRoot(container);
 
 //   /* ============================================================
 //      STEP 4: Start React Render Pipeline
@@ -286,8 +286,8 @@ export default Intro_react;
 //      - root.render() schedules work with the Scheduler
 //      - Rendering does NOT immediately update the DOM
 //      - React enters the Render Phase
+//      - root.render(heading);
 //   ============================================================ */
-//   root.render(heading);
 
 //   /* ============================================================
 //      ------------ INTERNAL REACT RENDER PIPELINE ----------------
@@ -370,3 +370,13 @@ export default Intro_react;
 //   ============================================================ */
 
 // </script>
+
+// // Full Pipeline (One View)
+//  → JSX
+//  → React.createElement (describe UI)
+//  → Virtual DOM
+//  → Fiber (split work)
+//  → Reconciler (diffing)
+//  → Scheduler (prioritize)
+//  → Commit Phase
+//  → Browser DOM
