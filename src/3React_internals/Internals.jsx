@@ -1492,7 +1492,9 @@
 // DOM + Effects
 
 
-// 🖥️ Fiber Node — Internal Data Structure
+// ___________________________________🖥️ Fiber Node — Internal Data Structure___________________________________
+
+
 // 1️⃣ Fiber Node Concept
 
 // Fiber = unit of work in React
@@ -1716,7 +1718,7 @@
 //        └─ props: 'Hello Rohit'         └─ pendingProps: 'Hello World'
 //        └─ effectTag: NoFlags           └─ effectTag: Update
 
-// 🖥️🔥 MEGA FULL-WIDTH REACT TERMINAL PIPELINE
+// _______________________________________🖥️🔥 MEGA FULL-WIDTH REACT TERMINAL PIPELINE_____________________________________
 
 // ┌──────────────────────────────────────────────────────────────────────────────┐
 // │                                  YOUR CODE                                    │
