@@ -199,9 +199,21 @@ export default Counter;
 
 // Call hooks out-of-order → slot mismatch → corrupted Fiber → buggy UI
 
+// ✅ Valid order patterns
+// 1. Multiple hooks of same type are fine
+// useState(...)
+// useState(...)
+// useEffect(...)
+// useEffect(...)
+// useMemo(...)
+
+
+// No required grouping—just consistent order.
+
 // 🎯 Interview-Ready Summary
 
 // React hooks rules exist to protect the Fiber’s internal hook state. Fiber stores hooks in a list per component, incremented in call order. Violating the rules (conditional hooks, loops, or non-component calls) breaks the mapping between hook calls and Fiber slots, causing state mismatches and rendering bugs, especially in concurrent mode.
+
 
 // ________________________________🟢 Phase 1 — How useState Works Internally (High-Level Mental Model)_________________
 
@@ -702,6 +714,7 @@ export default Counter;
 
 
 // ✅ Key Takeaways
+
 // Each useState has its own Hook object in Fiber.
 
 // Hook order is critical — React identifies hooks by position.
