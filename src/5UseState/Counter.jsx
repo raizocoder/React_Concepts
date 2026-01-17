@@ -267,6 +267,15 @@ export default Counter;
 //   queue: [] // pending updates
 // }
 
+// One hook node
+
+// const hook = {
+//   memoizedState: null,   // current state value
+//   queue: {
+//     pending: null        // queued state updates
+//   },
+//   next: null
+// };
 // ____________________Why UseState() exist and what problems solves ?__________________
 
 // Vanilla JS Counter
