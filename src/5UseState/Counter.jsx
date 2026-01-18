@@ -207,13 +207,11 @@ export default Counter;
 // useEffect(...)
 // useMemo(...)
 
-
 // No required grouping—just consistent order.
 
 // 🎯 Interview-Ready Summary
 
 // React hooks rules exist to protect the Fiber’s internal hook state. Fiber stores hooks in a list per component, incremented in call order. Violating the rules (conditional hooks, loops, or non-component calls) breaks the mapping between hook calls and Fiber slots, causing state mismatches and rendering bugs, especially in concurrent mode.
-
 
 // ________________________________🟢 Phase 1 — How useState Works Internally (High-Level Mental Model)_________________
 
@@ -520,7 +518,6 @@ export default Counter;
 //    ↓
 // DOM updated
 
-
 // 1️⃣ Component renders
 //    → Fiber node is created
 //    → Hook object stores memoizedState + empty queue
@@ -556,7 +553,6 @@ export default Counter;
 // 8️⃣ Batching:
 //    → Multiple setState calls in same event are combined
 //    → Only 1 re-render happens → better performance
-
 
 // 🟢 useState Internal Flow — Detailed Terminal Diagram
 
@@ -672,12 +668,10 @@ export default Counter;
 // │   - Browser paints: <h1>Count: 2</h1>                                        │
 // └───────────────────────────────────────────────────────────────────────────────┘
 
-
 // _________________🟢 Phase 4 — Multiple useState, Hook Ordering, and Why Hooks MUST Be Top-Level_______________
 
-
-  // const [count, setCount] = useState(0);
-  // const [name, setName] = useState("Rohit");
+// const [count, setCount] = useState(0);
+// const [name, setName] = useState("Rohit");
 
 // Each useState call creates a separate Hook object in the Fiber node.
 
@@ -688,7 +682,6 @@ export default Counter;
 // AppFiber.memoizedState
 //  ├─ Hook1 → count = 0, queue = []
 //  └─ Hook2 → name = "Rohit", queue = []
-
 
 // Hook1 = first useState
 
@@ -721,7 +714,6 @@ export default Counter;
 //         ▼
 // Commit Phase → update only changed nodes in real DOM
 
-
 // ✅ Key Takeaways
 
 // Each useState has its own Hook object in Fiber.
@@ -746,7 +738,6 @@ export default Counter;
 
 // ___________🟢 Phase 5 — Advanced useState Internals: Stale Closures, Functional Updates & Batching__________
 
-
 // 1️⃣ Stale Closure Problem (Outdated state Or Old snapshot of state)
 
 // In React, each render creates a new function scope.
@@ -766,7 +757,6 @@ export default Counter;
 //   return <button onClick={handleClick}>{count}</button>;
 // }
 
-
 // Problem:
 
 // count inside the setTimeout captures the value at render time.
@@ -776,7 +766,6 @@ export default Counter;
 // Fix with functional update:
 
 // setCount(prev => prev + 1); // ✅ always uses latest state
-
 
 // React applies queued functional updates in order.
 
@@ -793,7 +782,6 @@ export default Counter;
 // setName("Rohit");
 // setCount(prev => prev + 1);
 
-
 // React batches updates synchronously in events or asynchronously in React 18 concurrent mode
 
 // Internal flow:
@@ -802,7 +790,6 @@ export default Counter;
 // Hook2.queue = ["Rohit"]
 // Render Phase applies all updates
 // Only 1 re-render occurs
-
 
 // Important: Batching works only within React events. Native events or setTimeout may need React 18 concurrent batching.
 
@@ -830,7 +817,6 @@ export default Counter;
 
 // setCount(prev => prev + 1);
 
-
 // Prevents incorrect updates and ensures correct batching.
 
 // 2️⃣ Avoid Unnecessary Re-renders
@@ -841,12 +827,10 @@ export default Counter;
 
 // const [state, setState] = useState({count:0, name:'Rohit'});
 
-
 // Use separate hooks:
 
 // const [count, setCount] = useState(0);
 // const [name, setName] = useState('Rohit');
-
 
 // Updating one value doesn’t re-render unrelated parts.
 
@@ -892,7 +876,6 @@ export default Counter;
 //   return <button onClick={increment}>{count}</button>;
 // }
 
-
 // Behavior internally:
 
 // Hook object created with memoizedState = 0
@@ -917,7 +900,6 @@ export default Counter;
 //   );
 // }
 
-
 // Internal advantage: Updating one state does not affect the other hook’s memoizedState.
 
 // Maintains minimal re-renders.
@@ -929,7 +911,6 @@ export default Counter;
 // const [user, setUser] = useState({ name: "Rohit", age: 25 });
 
 // const updateName = (newName) => setUser(prev => ({ ...prev, name: newName }));
-
 
 // Why use functional update:
 
@@ -950,7 +931,6 @@ export default Counter;
 //   setCount(prev => prev + 1);
 // };
 
-
 // Internal behavior:
 
 // Both functions are queued in Hook.queue
@@ -964,7 +944,6 @@ export default Counter;
 // Pattern: Pass a function to useState to compute initial state once.
 
 // const [data, setData] = useState(() => expensiveComputation());
-
 
 // Advantage:
 
@@ -981,7 +960,6 @@ export default Counter;
 // const [isOpen, setIsOpen] = useState(false);
 // const toggle = () => setIsOpen(prev => !prev);
 
-
 // Internal:
 
 // Uses functional update → guarantees latest value
@@ -994,7 +972,6 @@ export default Counter;
 
 // const [count, setCount] = useState(0);
 // const doubled = count * 2; // compute, not stored in state
-
 
 // Why: Avoids state duplication and keeps Fiber/hook queues minimal
 
@@ -1014,7 +991,6 @@ export default Counter;
 
 // 🔹 Visual Summary of Patterns
 
-
 // | Pattern                     | Use Case                      | Internal Benefit                           |
 // | --------------------------- | ----------------------------- | ------------------------------------------ |
 // | Single primitive state      | Counter, input                | Simple hook object                         |
@@ -1026,3 +1002,39 @@ export default Counter;
 // | Derived state               | Computed from other state     | Avoids unnecessary memoized state          |
 // | Top-level only              | All                           | Maintains hook order & Fiber integrity     |
 
+// React Internal Working When useState is Set to the Same Value
+
+// [User triggers setState(same value)]
+//                  │
+//                  ▼
+//       [React Scheduler receives update]
+//                  │
+//                  ▼
+//        [Render Phase starts]
+//                  │
+//                  ▼
+//      [Begin Work on component fiber]
+//                  │
+//                  ▼
+//    [Check current state vs new state]
+//                  │
+//        ┌─────────┴─────────┐
+//        │                   │
+// [State is same]       [State is different]
+//        │                   │
+//        ▼                   ▼
+// [Bailout / Skip        [Update fiber memoizedState]
+//  rendering this        └─> Reconcile children (diffing)
+//  component]                  │
+//        │                      ▼
+//        ▼                [Mark effect tags (Placement / Update / Deletion)]
+// [No children diffing]         │
+//        │                      ▼
+//        ▼                [Continue Render Phase for other fibers]
+// [Render Phase ends for this fiber]
+//        │
+//        ▼
+// [Commit Phase runs for fibers with changes only]
+//        │
+//        ▼
+// [Browser DOM remains unchanged]
