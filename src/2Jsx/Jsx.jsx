@@ -1,7 +1,7 @@
 import React from "react";
 
 const Jsx = () => {
-  return <div>Jsx</div>;
+  return <div>Jsx</div>; // ==========> This is Jsx Syntax
 };
 
 export default Jsx;
@@ -66,6 +66,8 @@ export default Jsx;
 //     'h1',          // type of element
 //     null,          // props
 //     'Hello World'  // children
+//     'keys'        // keys for list
+//     'ref'        // reference for element
 //   );
 // }
 
@@ -98,6 +100,7 @@ export default Jsx;
 // | `ref`      | DOM or instance reference             |
 
 // ✅ This is called a React Element
+
 // Tip: React elements are immutable. You never change them. If the state changes, React creates a new element.
 
 // 5️⃣ React Element vs DOM Element (Very Important)
@@ -158,7 +161,8 @@ React.createElement(
 
 // Rules of JSX
 
-// 1. Every HTML element must be closed and should be in small letters and component name has capital letter thats the difference react understand what is component and what is html tag.
+// 1. Every HTML element must be closed and should be in small letters and Component name has capital letter thats the difference react understand what is component and what is html tag.
+
 {/* <Header /> // component
  <header /> // DOM element */}
 //  Why?
@@ -174,6 +178,7 @@ React.createElement(
 // 4. Use of curly braces for render any data into JSX like ----> <h1>hello{Rohit}</h1>.
 
 // 5. If required for incline style in JSX use double curly braces write like 
+
 // <h1 style={{backgroundColor:"red"}}>hello{1}</h1> but not recommenced because pseudo-class and pseudo-element like hover not work.
 
 // 6. Template lateral use like  {`${hi}`} 
@@ -189,6 +194,7 @@ React.createElement(
 
 
 // JSX is just a description of UI
+
 // React decides WHEN and HOW to make it real
 
 // 11. JSX Ignores Undefined, Null, False

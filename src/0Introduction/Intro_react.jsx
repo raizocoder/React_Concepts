@@ -1,11 +1,3 @@
-import React from "react";
-
-const Intro_react = () => {
-  return <div>Introduction of react JS</div>;
-};
-
-export default Intro_react;
-
 // 1. What is React ?
 // React is free open source frontend library for building User interfaces by using a component based architecture.
 // React library focus only on UI part.
@@ -42,7 +34,10 @@ export default Intro_react;
 
 // 3. Structure of React library ?
 
-// React library is Build by two major vanilla JavaScript libraries  that is one is react which has 3000 js lines of code and other is react-dom which has 30,000 js lines of code and react and react-dom has uses other libraries in it thats why whenever you install react and react-dom both it has many folders and files already in it.
+// React library is Build by two major vanilla JavaScript libraries 
+
+// one is react which has 3000 js lines of code and other is react-dom which has 30,000 js lines of code
+// second react-dom has uses other libraries in it thats why whenever you install react and react-dom both it has many folders and files already in it.
 
 // react library --- createElement, props, hooks etc
 // react-dom library --- Virtual DOM , portal, createRoot, render etc

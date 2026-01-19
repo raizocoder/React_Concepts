@@ -20,6 +20,7 @@ export default Component;
 // The component is just like a function that return JSX Elements like HTML and  JavaScript together and later JSX covert into pure JavaScript Objects. JSX provides  method that you can use HTML and JavaScript together in a single line and later JSX code transforms into pure JS code by Babel JS library.
 
 // example as above
+
 // const Component = () => {
 //   return <div> I just a Component</div>;
 // };
@@ -64,7 +65,7 @@ export default Component;
 
 // like export default App;
 
-// and for default import like -- import App from "./App"
+// and for default import like -- import App from "./App" without curly braces
 
 // * remember Default export is only one in one js file.
 
@@ -75,6 +76,7 @@ export default Component;
 
 
 // 🔁 Lifecycle vs Hooks Mapping Table
+
 // 🧱 Class Components → 🧩 Function Components
 
 // ┌───────────────────────────────┬───────────────────────────────┬──────────────────────────────┐
@@ -94,6 +96,7 @@ export default Component;
 // └───────────────────────────────┴───────────────────────────────┴──────────────────────────────┘
 
 // 🧩 Timing Breakdown (Critical)
+
 // RENDER PHASE
 // - function body
 // - useState

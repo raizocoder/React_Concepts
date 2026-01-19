@@ -3,8 +3,7 @@ import UseRef from "./8useRef/UseRef";
 const App = () => {
   return (
     <>
-      <Counter/>
-      <UseRef/>
+    
     </>
   );
 };
