@@ -1061,22 +1061,22 @@
 // | Library              | Public / Developer Features                  | Internal Features / Responsibilities                       |
 // +----------------------+----------------------------------------------+-------------------------------------------------------------+
 // | react                | - React.createElement                        | - Fiber architecture (component tree representation)      |
-// |                      | - JSX support (via Babel)                     | - Reconciler (diff old vs new virtual DOM)                 |
+// |                      | - JSX support (via Babel)                    |    Reconciler (diff old vs new virtualDOM)|
 // |                      | - Functional components                     | - Hooks system (useState, useEffect, useContext, etc.)    |
 // |                      | - useState, useEffect, useContext, etc.      | - Update queues for state and props                        |
-// |                      | - createContext                              | - Effect flags for commit phase                             |
+// |                      | - createContext                              | - Effect flags for commit  phase                          |
 // |                      | - memo, lazy, Suspense                        | - Scheduler / Lanes (Sync, Default, Transition)           |
-// |                      | - Fragment                                   | - Concurrent rendering support                               |
-// |                      | - StrictMode                                 | - Error boundaries & lifecycle logic                        |
+// |                      | - Fragment                                   | - Concurrent rendering support                            |
+// |                      | - StrictMode                                 | - Error boundaries & lifecycle logic                      |
 // +----------------------+----------------------------------------------+-------------------------------------------------------------+
-// | react-dom            | - createRoot                                 | - DOM renderer for host environment                         |
-// |                      | - render / hydrateRoot                        | - Commit phase execution (DOM mutations)                    |
-// |                      | - flushSync                                  | - Synthetic event system (delegation & normalization)       |
-// |                      | - findDOMNode (legacy)                        | - Portals support                                           |
-// |                      |                                              | - Hydration support (SSR / streaming)                       |
-// |                      |                                              | - Effect handling (useLayoutEffect, passive effects)        |
-// |                      |                                              | - Fiber host config (DOM node creation & placement)         |
-// |                      |                                              | - DevTools integration                                      |
+// | react-dom            | - createRoot                                 | - DOM renderer for host environment                        |
+// |                      | - render / hydrateRoot                        | - Commit phase execution (DOM mutations)                  |
+// |                      | - flushSync                                  | - Synthetic event system (delegation & normalization)      |
+// |                      | - findDOMNode (legacy)                        | - Portals support                                         |
+// |                      |                                              | - Hydration support (SSR / streaming)                      |
+// |                      |                                              | - Effect handling (useLayoutEffect, passive effects)       |
+// |                      |                                              | - Fiber host config (DOM node creation & placement)        |
+// |                      |                                              | - DevTools integration                                     |
 // +----------------------+----------------------------------------------+-------------------------------------------------------------+
 
 // ┌───────────────┐
@@ -1465,6 +1465,7 @@
 // H1Fiber → Host component <h1> (actual DOM node)
 
 // 2️⃣ Fiber Structure — Step by Step
+
 // 🔹 FiberRootNode
 // FiberRootNode = {
 //   current: AppFiber,         // Committed tree
