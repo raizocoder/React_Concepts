@@ -1,12 +1,5 @@
-import React from "react";
-
-const Props = () => {
-  return <div>Props</div>;
-};
-
-export default Props;
-
 // Props Rules
+
 // 1. Props are objects that store data in key:value pair and Props can be any JavaScript value
 
 {/* <Component
@@ -18,7 +11,7 @@ export default Props;
   {[1, 2, 3]}
 /> */}
 
-// Props stores data like strings , numbers,boolean, array , objects.
+// Props stores data like strings , numbers, boolean, array , objects.
 
 // 2. Props flow one-way (parent → child)
 
