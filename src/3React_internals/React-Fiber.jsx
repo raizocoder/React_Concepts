@@ -4,447 +4,14 @@
 
 🔰 PHASE 0 — BEFORE FIBER (WHY IT WAS NEEDED)
 
-❌ Old React (Stack Reconciler)
-
-Before Fiber (React ≤15):
-
-React used a recursive call stack
-
-Once rendering started → cannot pause
-
-Long render = UI freeze 😵
-
-Animations, typing, scrolling felt laggy
-
-JS Call Stack (Blocking)
-└── render App
-    └── render Header
-        └── render Menu
-            └── render Items (1000 items 😱)
-
-
-👉 Browser can’t breathe until React finishes.
-
-🎯 Problem React Faced
-
-Browsers need time for:
-
-User input
-
-Animations
-
-Network
-
-Paint
-
-But React:
-
-Took full control
-
-Didn’t yield back control
-
-🚀 Solution = React Fiber
-🔰 PHASE 1 — WHAT IS REACT FIBER (BASIC IDEA)
-✅ Simple Definition
-
-Fiber is React’s internal engine that breaks rendering work into small units so React can pause, resume, and prioritize work.
-
-In simple words:
-
-Fiber = Smart Scheduler + New Data Structure
-
-🧩 Fiber Has TWO Meanings
-
-1️⃣ Architecture
-
-New reconciliation & scheduling system
-
-2️⃣ Fiber Node
-
-A JavaScript object representing one component / element
-
-🔁 Old vs Fiber
-Old React	Fiber
-Recursive	Iterative
-Blocking	Interruptible
-No priority	Priority-based
-One big render	Small chunks
-Bad UX	Smooth UX
-🔰 PHASE 2 — FIBER NODE (CORE BUILDING BLOCK)
-
-Each React element becomes a Fiber Node
-
-🧱 Fiber Node = Plain JS Object
-const fiberNode = {
-  type,
-  key,
-  stateNode,
-  child,
-  sibling,
-  return,
-  pendingProps,
-  memoizedProps,
-  memoizedState,
-  updateQueue,
-  flags,
-  lanes,
-}
-
-
-Don’t panic — we’ll break this down slowly 👇
-
-🌳 Fiber Tree (NOT Call Stack)
-
-Fiber builds a linked list tree, not recursion.
-
-App
- ├─ Header
- │   └─ Logo
- └─ Content
-     ├─ Sidebar
-     └─ Main
-
-
-Each node knows:
-
-First child
-
-Next sibling
-
-Parent
-
-👉 This allows React to pause anywhere.
-
-🔰 PHASE 3 — CORE FIBER LINKS (VERY IMPORTANT)
-These 3 pointers enable interruption:
-child   → first child
-sibling → next sibling
-return  → parent
-
-
-Example:
-
-<App>
-  <Header />
-  <Content />
-</App>
-
-App
- ├── child → Header
- │      sibling → Content
- └── return → null
-
-
-React can now:
-
-Process Header
-
-Pause
-
-Resume Content later
-
-🔰 PHASE 4 — RENDER PHASE (FIBER WORK LOOP)
-🔁 Fiber uses a Work Loop
-while (nextUnitOfWork) {
-  nextUnitOfWork = performUnitOfWork(nextUnitOfWork)
-}
-
-
-Each unit = one Fiber
-
-🛠 performUnitOfWork
-
-Steps:
-
-Begin work
-
-Create child fibers
-
-Return next fiber
-
-function performUnitOfWork(fiber) {
-  beginWork(fiber)
-  if (fiber.child) return fiber.child
-
-  while (fiber) {
-    completeWork(fiber)
-    if (fiber.sibling) return fiber.sibling
-    fiber = fiber.return
-  }
-}
-
-
-🔥 THIS is the heart of Fiber.
-
-🔰 PHASE 5 — BEGIN WORK (TOP-DOWN)
-What happens here?
-
-Calls component function
-
-Executes hooks
-
-Creates child fibers
-
-function MyComponent(props) {
-  const [count, setCount] = useState(0)
-  return <div>{count}</div>
-}
-
-
-Internally:
-
-React calls function
-
-Hook state read
-
-JSX → Fiber children
-
-⚠️ No DOM update yet
-
-🔰 PHASE 6 — COMPLETE WORK (BOTTOM-UP)
-What happens here?
-
-Prepare DOM mutations
-
-Collect effects
-
-Complete child → bubble up effects
-
-
-Example:
-
-Create DOM nodes
-
-Prepare placement / update / delete flags
-
-🔰 PHASE 7 — COMMIT PHASE (UNINTERRUPTIBLE)
-
-🚨 This phase cannot be paused
-
-Commit has 3 sub-phases:
-1️⃣ Before Mutation
-
-getSnapshotBeforeUpdate
-
-2️⃣ Mutation Phase
-
-DOM updates
-
-Ref updates
-
-div.textContent = "Hello"
-
-3️⃣ Layout Phase
-
-useLayoutEffect
-
-ComponentDidMount / Update
-
-🔰 PHASE 8 — DOUBLE BUFFERING (CURRENT vs WORK-IN-PROGRESS)
-
-React keeps two trees:
-
-Tree	Purpose
-current	What user sees
-workInProgress	New changes
-currentTree  ← displayed
-workTree     ← building
-
-
-After commit:
-
-currentTree = workTree
-
-
-⚡ This enables interruption safely.
-
-🔰 PHASE 9 — PRIORITY & LANES (CONCURRENT MAGIC)
-
-Fiber uses lanes to prioritize updates.
-
-Example priorities:
-Update	Priority
-Typing	High
-Click	High
-Animation	Medium
-Data fetch	Low
-setState()           // normal
-startTransition()   // low priority
-
-startTransition(() => {
-  setSearchResults(data)
-})
-
-
-👉 Typing won’t lag anymore 🔥
-
-🔰 PHASE 10 — TIME SLICING (PAUSE & RESUME)
-
-React checks:
-
-shouldYield()
-
-
-If browser needs time:
-
-React pauses
-
-Browser handles input
-
-React resumes later
-
-🔰 PHASE 11 — HOOKS & FIBER (DEEP LINK)
-
-Hooks are stored on Fiber
-
-fiber.memoizedState = {
-  memoizedState: 0,
-  queue: {...},
-  next: {...}
-}
-
-
-Hooks work because:
-
-Fiber keeps hook list
-
-Order must stay same
-
-❌ Conditional hooks break Fiber logic
-
-🔰 PHASE 12 — EFFECTS & FLAGS
-
-Each fiber has flags:
-
-Flag	Meaning
-Placement	Insert DOM
-Update	Update DOM
-Deletion	Remove
-Passive	useEffect
-
-React walks the tree & executes flags.
-
-🔰 PHASE 13 — WEIRD & HIDDEN BEHAVIORS ⚠️
-1️⃣ StrictMode Double Render (DEV ONLY)
-<MyComponent />
-
-
-Rendered twice to detect:
-
-Side effects
-
-Unsafe logic
-
-✅ Production = once
-
-2️⃣ Render Phase Can Run Multiple Times
-
-Render is:
-
-Pure
-
-Restartable
-
-Throwaway
-
-❌ Don’t do side effects in render
-
-3️⃣ State Updates Can Be Deferred
-setState()
-console.log(state) // old value
-
-
-Because:
-
-Update scheduled
-
-Not committed yet
-
-🔰 PHASE 14 — PERFORMANCE BEST PRACTICES (FIBER-FRIENDLY)
-
-✅ Use:
-
-useMemo
-
-useCallback
-
-memo
-
-startTransition
-
-❌ Avoid:
-
-Heavy logic in render
-
-Large synchronous loops
-
-Unnecessary re-renders
-
-🔰 PHASE 15 — SECURITY & FIBER
-
-Fiber helps security by:
-
-Preventing UI blocking (DoS-like freezes)
-
-Controlled DOM mutations
-
-Predictable commit phase
-
-But still:
-
-❌ Never trust user input
-
-❌ Avoid dangerouslySetInnerHTML
-
-🔰 PHASE 16 — HOW EVERYTHING WORKS TOGETHER (FINAL FLOW)
-State Update
-   ↓
-Scheduler assigns priority
-   ↓
-Fiber Render Phase (interruptible)
-   ↓
-Complete Work (collect effects)
-   ↓
-Commit Phase (DOM update)
-   ↓
-Browser Paint
-
-🧠 FINAL MENTAL MODEL
-
-Fiber turns React from a blocking renderer into a cooperative multitasking system.
-
-Think of Fiber as:
-
-🧵 Thread manager
-
-🧠 Brain of React
-
-🚦 Traffic controller
-
-⏸ Pause / ▶ Resume engine
-
-If you want next:
-
-🔥 Fiber + Concurrent Rendering Internals
-
-🔥 Fiber vs Virtual DOM Myth
-
-🔥 Build Mini Fiber Renderer from Scratch
-
-🔥 Interview-level Fiber Questions
-
-🔥 Fiber Debug Diagrams (terminal style)
-
-Just say “next” 🚀
-
-🔰 PHASE 0 — BEFORE FIBER (WHY IT WAS NEEDED)
-
 Below is 🔰 PHASE 0 — BEFORE FIBER (WHY IT WAS NEEDED) explained very deeply but in simple words, step-by-step, with mental models, internal behavior, and real browser reality.
 
 Think of this as React’s “pain story” before Fiber existed.
 
 🔰 PHASE 0 — BEFORE FIBER
+
 ❓ Why React HAD to change its core engine
+
 🧠 BIG PICTURE (ONE LINE)
 
 Old React could render fast, but it could NOT stop once it started.
@@ -475,7 +42,9 @@ No streaming UX expectations
 But the web changed.
 
 ⚙️ OLD REACT ENGINE — STACK RECONCILER
+
 How old React rendered UI
+
 Render starts
 ↓
 Call component A
@@ -549,6 +118,7 @@ Animate
 Paint
 
 😵 USER EXPERIENCE DISASTER
+
 Example: Large List Rendering
 <ul>
   {Array.from({ length: 5000 }).map(...)}
@@ -649,6 +219,7 @@ No way to say:
 “Continue later”
 
 ❌ WHAT OLD REACT COULD NOT DO
+
 Feature	Old React
 Pause render	❌
 Resume render	❌
@@ -658,6 +229,7 @@ Time slicing	❌
 Concurrent rendering	❌
 Suspense	❌
 Transitions	❌
+
 🧩 WHY RECURSION WAS THE ENEMY
 
 Recursion:
@@ -778,6 +350,7 @@ React Fiber is a new internal architecture that lets React pause, resume, priori
 If you remember only one line → remember this.
 
 🧩 WHAT EXACTLY CHANGED?
+
 ❌ Old React (Stack Reconciler)
 
 Rendering = function calls
@@ -795,6 +368,7 @@ Driven by custom scheduler
 Can pause, resume, reorder
 
 🔄 IMPORTANT: FIBER HAS TWO MEANINGS
+
 1️⃣ Fiber Architecture
 
 New reconciliation algorithm
@@ -845,6 +419,7 @@ Resume later
 Stop useless work
 
 Call stack = ❌ no control
+
 Fiber objects = ✅ full control
 
 🧵 FIBER = “VIRTUAL CALL STACK”
@@ -3621,164 +3196,483 @@ Suspense + lazy loading → Fiber can pause/resume efficiently
 
 ✅ Phase 13 is all about writing React apps that fully leverage Fiber’s power — smooth, concurrent, interruptible, and efficient.
 
-If you want, I can now create a full visual PHASE-BY-PHASE React Fiber map — showing all 13 phases together with flags, lanes, WIP tree, commit phase, hooks, time-slicing, and effects, which would be your ultimate Fiber reference.
+*/
 
-Do you want me to do that?
+/*🌳 REACT LEGACY RENDERING INTERNAL WORKING — TERMINAL TREE STRUCTURE
 
-now create a full PHASE-BY-PHASE DIAGRAM of React Fiber internals connecting all 12 phases — showing how Begin Work → Complete Work → Commit → Double Buffering → Lanes → Time Slicing → Hooks → Cleanup & Effects all work together like real accurate flow 
+REACT APPLICATION
+│
+├── STATE / UPDATE ORIGIN (Root of Everything)
+│   │
+│   ├── setState()
+│   ├── useState setter
+│   ├── useReducer dispatch
+│   ├── Context value change
+│   ├── Props change (from parent)
+│   ├── Force update
+│   │
+│   └── Update Object Created
+│       ├── update.payload
+│       ├── update.lane (priority)
+│       ├── update.timestamp
+│       └── update.source (event / async / effect)
+│
+└── REACT RECONCILER (Scheduler + Fiber Engine)
+    │
+    ├── Scheduler (PRIORITY DECISION)
+    │   │
+    │   ├── Sync Updates (click, input)
+    │   ├── Concurrent Updates
+    │   ├── Transition Updates
+    │   ├── Idle / Low Priority
+    │   │
+    │   └── Lane Assignment
+    │
+    └── WORK LOOP
+        │
+        ├─────────────────────────────────────────────┐
+        │                                             │
+        ▼                                             ▼  
+  (RENDER PHASE)                                (COMMIT PHASE)
+        
 
-Absolutely! Let’s create a full PHASE-BY-PHASE React Fiber diagram that connects all 13 phases (including performance best practices). I’ll make it step-by-step, showing flow, connections, and Fiber internals.
+🧠 RENDER PHASE (PURE — NO DOM, NO SIDE EFFECTS)
 
-Here’s the ultimate React Fiber internals flow:
+RENDER PHASE (Reconciliation)
+│
+├── beginWork (TOP → DOWN)
+│   │
+│   ├── Read pending updates
+│   ├── Apply update to state
+│   ├── Call function component
+│   ├── Execute render logic
+│   │
+│   ├── Hooks Processing
+│   │   ├── useState
+│   │   ├── useReducer
+│   │   ├── useMemo
+│   │   ├── useCallback
+│   │   ├── useContext
+│   │   └── Hook order validation
+│   │
+│   └── JSX → React Elements
+│
+├── Child Reconciliation
+│   │
+│   ├── Diff old Fiber tree vs new elements
+│   ├── Key comparison
+│   ├── Type comparison
+│   │
+│   └── Effect Tags Assigned
+│       ├── Placement (new)
+│       ├── Update (changed)
+│       ├── Deletion (removed)
+│
+├── CompleteWork (BOTTOM → UP)
+│   │
+│   ├── Build Fiber tree
+│   ├── Prepare DOM nodes (not attach)
+│   ├── Bubble effect flags
+│   │
+│   └── Prepare effect list
+│
+├── Can Pause / Resume / Restart
+│   │
+│   ├── Time slicing
+│   ├── Interruptible
+│   └── Retry on higher priority update
+│
+└── Render Phase Output
+    │
+    ├── New Fiber Tree
+    ├── Effect List
+    └── NO DOM MUTATION YET ❌
 
-🔹 REACT FIBER PHASE-BY-PHASE DIAGRAM
-PHASE 0 — BEFORE FIBER (Why it was needed)
-└─ Old Stack Reconciler → sync, blocking, no pause/resume
-      |
-      v
-PHASE 1 — FIBER CREATION
-└─ Create Fiber nodes for each component:
-      Fiber {
-        type, key, stateNode, child, sibling, return, memoizedState, updateQueue, flags, lanes, alternate
-      }
-      |
-      v
-PHASE 2 — FIBER TREE STRUCTURE
-└─ Link Fibers: child, sibling, return pointers
-      Builds complete in-memory tree of the app
-      |
-      v
-PHASE 3 — CORE FIBER LINKS
-└─ Each Fiber connected:
-      alternate → WIP ↔ current
-      child/sibling/return → traverse tree
-      flags → track effects
-      lanes → priority updates
-      |
-      v
-PHASE 4 — RENDER PHASE (FIBER WORK LOOP)
-└─ React starts traversing WIP Fiber tree
-      - Begin Work → top-down
-      - Complete Work → bottom-up
-      - Collect effects & flags
-      - Can pause & resume (time slicing)
-      |
-      v
-PHASE 5 — BEGIN WORK (TOP-DOWN)
-└─ For each Fiber node:
-      - Compare props/state
-      - Clone WIP Fiber from current (double buffering)
-      - Process updates
-      - Return first child → next unit of work
-      |
-      v
-PHASE 6 — COMPLETE WORK (BOTTOM-UP)
-└─ Bubble child flags to parent
-      - Build effect list
-      - Prepare DOM changes (Placement / Update / Deletion)
-      - Prepare hooks effects
-      |
-      v
-PHASE 7 — COMMIT PHASE (ACTUAL DOM UPDATES)
-└─ Process effect list linearly:
-      - Placement → insert DOM nodes
-      - Update → apply props/state changes
-      - Deletion → remove nodes
-      - Layout Effects → sync post-DOM
-      - Passive Effects → async post-commit
-      - Swap WIP ↔ current (double buffering)
-      |
-      v
-PHASE 8 — DOUBLE BUFFERING (CURRENT vs WORK-IN-PROGRESS)
-└─ Two versions of Fiber tree:
-      current → committed DOM
-      work-in-progress → rendering updates
-      - alternate pointer links them
-      - allows pausing/resuming render safely
-      |
-      v
-PHASE 9 — PRIORITY & LANES (CONCURRENT MAGIC)
-└─ Each update assigned a lane:
-      - SyncLane → immediate
-      - InputLane → high
-      - DefaultLane → normal
-      - TransitionLane → low
-      - IdleLane → very low
-      Scheduler chooses **highest priority lane** to work on
-      |
-      v
-PHASE 10 — TIME SLICING (PAUSE & RESUME)
-└─ Fiber traverses **unit of work = 1 Fiber node**
-      - After each unit → check shouldYield()
-      - If yield → pause WIP tree → resume next frame
-      - Browser remains responsive → concurrent rendering
-      |
-      v
-PHASE 11 — HOOKS & FIBER (DEEP LINK)
-└─ Each function component:
-      Fiber.memoizedState → linked list of hooks
-      useState / useReducer → store state + queue
-      useEffect / useLayoutEffect → stored in effect list
-      Dispatch → enqueue updates → schedule Fiber work
-      WIP Fiber updates memoizedState → swapped at commit
-      |
-      v
-PHASE 12 — EFFECTS, FLAGS & CLEANUP
-└─ Fiber tracks side effects via flags:
-      - Placement / Update / Deletion / Passive / Layout / Ref
-      - Effect list → linear processing in commit phase
-      - Reconciliation → diff current vs WIP
-      - Delete unused fibers safely → cleanup
-      - DOM minimally updated → efficient updates
-      |
-      v
-PHASE 13 — PERFORMANCE BEST PRACTICES
-└─ Fiber-friendly coding:
-      - Use proper keys
-      - React.memo + useMemo + useCallback
-      - Split large components
-      - startTransition for low-priority updates
-      - Avoid conditional hooks
-      - Batch updates & minimize effects
-      - Suspense + lazy-loading
-      - Immutable data structures → easy Fiber bailout
-      - Profile Fiber tree for hotspots
-
-🔹 VISUAL FLOW (CONCISE)
-[Old Stack Problem] 
-       ↓
-[Fiber Creation] → [Fiber Tree Structure] → [Core Links]
-       ↓
-   [Render Phase]
-       ↓
-   [Begin Work]  ←→  [Complete Work]   (top-down / bottom-up)
-       ↓
-[Double Buffering: WIP ↔ Current] ←→ [Hooks linked list inside Fiber]
-       ↓
-[Priority & Lanes Scheduler] → [Time Slicing: pause/resume]
-       ↓
-[Commit Phase: apply flags/effects] → [Cleanup & Reconciliation]
-       ↓
-[DOM Updated, Effects run] → [Performance optimized apps]
-
-🔹 KEY CONNECTIONS
-
-Begin Work → Complete Work → Commit = core Fiber work loop
-
-Double buffering → allows WIP tree updates without touching DOM
-
-Lanes + Scheduler → prioritize important updates
-
-Time slicing → pause/resume Fiber units per frame
-
-Hooks → state/effects tied to Fiber memoizedState
-
-Flags + Effect list → track what DOM/side effect operations to apply
-
-Cleanup / Reconciliation → remove or reuse fibers efficiently
-
-Performance practices → leverage all Fiber internals efficiently
+⚠️ IMPORTANT RULES OF RENDER PHASE
+✓ Pure
+✓ Deterministic
+✓ Can run multiple times
+✗ No DOM access
+✗ No side effects
+✗ No refs
+✗ No useEffect execution
 
 
+⚡ COMMIT PHASE (MUTATION + SIDE EFFECTS)
+
+COMMIT PHASE (Non-Interruptible)
+│
+├── Before Mutation Phase
+│   │
+│   ├── getSnapshotBeforeUpdate
+│   │
+│   ├── Read DOM state
+│   │
+│   └── Prepare for mutations
+│
+├── Mutation Phase (DOM CHANGES)
+│   │
+│   ├── Apply Placement
+│   │   ├── Create DOM nodes
+│   │   └── Insert into DOM
+│   │
+│   ├── Apply Updates
+│   │   ├── Update attributes
+│   │   ├── Update styles
+│   │   ├── Update text nodes
+│   │   └── Update event handlers
+│   │
+│   ├── Apply Deletions
+│   │   ├── Remove DOM nodes
+│   │   └── Cleanup layout effects
+│   │
+│   └── Ref Updates
+│       ├── ref.current assigned
+│       └── Ref cleanup for removed nodes
+│
+├── Layout Effects Phase (SYNC)
+│   │
+│   ├── useLayoutEffect
+│   ├── componentDidMount
+│   ├── componentDidUpdate
+│   │
+│   └── DOM measurement allowed
+│
+├── Paint (Browser)
+│   │
+│   └── Screen updated
+│
+├── Passive Effects Phase (ASYNC)
+│   │
+│   ├── useEffect
+│   ├── Cleanup previous effects
+│   ├── Run new effects
+│   │
+│   └── Runs after paint
+│
+└── Commit Phase Rules
+    │
+    ├── Cannot pause
+    ├── Runs once per update
+    └── User sees changes here
+  
+ */
+
+//  🧩 FULL FLOW IN ONE LINE (MENTAL MODEL)
+
+// State Change
+//    ↓
+// Update Created
+//    ↓
+// Scheduler assigns priority
+//    ↓
+// Render Phase (calculate next UI)
+//    ↓
+// Fiber Tree + Effect List
+//    ↓
+// Commit Phase (apply to DOM)
+//    ↓
+// Layout Effects
+//    ↓
+// Paint
+//    ↓
+// Passive Effects
+
+/*🌳 REACT CONCURRENT RENDERING MODE — INTERNAL TERMINAL TREE
+
+REACT APPLICATION (Concurrent Root)
+│
+├── STATE / UPDATE ORIGIN
+│   │
+│   ├── setState()
+│   ├── useState setter
+│   ├── useReducer dispatch
+│   ├── Context change
+│   ├── Props change
+│   │
+│   └── Update Object Created
+│       ├── payload
+│       ├── lane (PRIORITY)
+│       ├── eventTime
+│       └── transition? (isTransition flag)
+│
+└── CONCURRENT RECONCILER
+    │
+    ├── Scheduler (TIME-AWARE)
+    │   │
+    │   ├── Immediate Lane (blocking)
+    │   ├── User Blocking Lane
+    │   ├── Transition Lane
+    │   ├── Default Lane
+    │   ├── Idle Lane
+    │   │
+    │   └── Lane Entanglement
+    │
+    └── WORK LOOP (INTERRUPTIBLE)
+        │
+        ├─────────────────────────────────────────────┐
+        │                                             │
+        ▼                                             ▼
+CONCURRENT RENDER PHASE                          COMMIT PHASE
+
+
+🧠 CONCURRENT RENDER PHASE (INTERRUPTIBLE)
+
+RENDER PHASE (Concurrent Reconciliation)
+│
+├── beginWork (Fiber by Fiber)
+│   │
+│   ├── Read update queue
+│   ├── Apply highest priority lane
+│   ├── Skip lower priority updates
+│   │
+│   ├── Call function component
+│   ├── Execute render logic
+│   │
+│   ├── Hooks Processing
+│   │   ├── useState
+│   │   ├── useReducer
+│   │   ├── useTransition
+│   │   ├── useDeferredValue
+│   │   └── useId
+│   │
+│   └── JSX → React Elements
+│
+├── Reconciliation (Diffing)
+│   │
+│   ├── Compare old Fiber vs new Fiber
+│   ├── Key-based matching
+│   ├── Partial tree rendering
+│   │
+│   └── Effect Flags
+│       ├── Placement
+│       ├── Update
+│       ├── Deletion
+│       └── Visibility
+│
+├── Yield Points (NEW 🔥)
+│   │
+│   ├── Check time slice
+│   ├── Yield to browser
+│   ├── Save progress
+│   │
+│   └── Resume later
+│
+├── Abort & Restart (VERY IMPORTANT)
+│   │
+│   ├── Higher priority update arrives
+│   ├── Current render discarded ❌
+│   ├── Restart from root
+│   │
+│   └── No DOM changes yet
+│
+├── CompleteWork (Bottom-Up)
+│   │
+│   ├── Finalize Fiber nodes
+│   ├── Bubble effect flags
+│   │
+│   └── Build effect list
+│
+└── Render Phase Output
+    │
+    ├── Work-In-Progress Fiber Tree
+    ├── Effect List
+    └── Render may NEVER commit ❗
+
+⚠️ CONCURRENT RENDER RULES
+✓ Can pause
+✓ Can resume
+✓ Can restart
+✓ Can be abandoned
+✗ Not guaranteed to commit
+✗ Must be pure
+
+
+⚡ COMMIT PHASE (SAME BUT STRICTER)
+
+COMMIT PHASE (Atomic & Non-Interruptible)
+│
+├── Before Mutation Phase
+│   │
+│   ├── getSnapshotBeforeUpdate
+│   │
+│   └── Freeze DOM state
+│
+├── Mutation Phase
+│   │
+│   ├── Placement
+│   ├── Updates
+│   ├── Deletions
+│   │
+│   └── Ref attachment
+│
+├── Layout Effects Phase (SYNC)
+│   │
+│   ├── useLayoutEffect
+│   ├── componentDidMount
+│   ├── componentDidUpdate
+│   │
+│   └── Blocking (runs before paint)
+│
+├── Paint
+│   │
+│   └── Browser paints screen
+│
+├── Passive Effects Phase (ASYNC)
+│   │
+│   ├── useEffect
+│   ├── Cleanup old effects
+│   ├── Run new effects
+│   │
+│   └── May be delayed further
+│
+└── Commit Phase Guarantees
+    │
+    ├── Runs exactly once
+    ├── Cannot be paused
+    └── User sees consistent UI
 
 */
+
+// 🔁 SPECIAL CONCURRENT FEATURES (NEW BRANCH)
+
+// CONCURRENT FEATURES
+// │
+// ├── Transitions
+// │   │
+// │   ├── startTransition()
+// │   ├── Non-urgent updates
+// │   └── Interruptible rendering
+// │
+// ├── Suspense
+// │   │
+// │   ├── Promise thrown during render
+// │   ├── Fallback UI shown
+// │   ├── Tree hidden / revealed
+// │   │
+// │   └── Retry when data resolves
+// │
+// ├── useDeferredValue
+// │   │
+// │   ├── Delay rendering value
+// │   ├── Show stale UI temporarily
+// │   │
+// │   └── Improve responsiveness
+// │
+// ├── Selective Hydration
+// │   │
+// │   ├── Prioritize visible content
+// │   └── Hydrate on interaction
+// │
+// └── Offscreen API
+//     │
+//     ├── Hide subtree
+//     ├── Preserve state
+//     └── Resume later
+
+// 🧠 ONE-LINE CONCURRENT FLOW
+// State Update
+//    ↓
+// Lane Priority Assigned
+//    ↓
+// Concurrent Render (pause / resume / restart)
+//    ↓
+// Fiber Tree Prepared
+//    ↓
+// Commit (atomic)
+//    ↓
+// Layout Effects
+//    ↓
+// Paint
+//    ↓
+// Passive Effects (delayed)
+
+// 🔥 WHY CONCURRENT MODE EXISTS (REAL REASON)
+
+// | Problem     | Solution             |
+// | ----------- | -------------------- |
+// | Input lag   | Interruptible render |
+// | Long lists  | Time slicing         |
+// | Slow data   | Suspense             |
+// | UI blocking | Transitions          |
+// | Bad UX      | Deferred rendering   |
+
+// 🧪 INTERVIEW KILLER LINE
+
+// Concurrent Mode does NOT make rendering faster — it makes rendering interruptible and schedulable.
+
+// 1️⃣ CONCEPTS THAT EXIST IN BOTH TREES (UNCHANGED CORE)
+
+// These concepts are fundamental React and never changed.
+
+// ✓ State
+// ✓ Props
+// ✓ Fiber tree
+// ✓ Reconciliation
+// ✓ Diffing algorithm
+// ✓ Render Phase
+// ✓ Commit Phase
+// ✓ Effect list
+// ✓ DOM mutations only in commit
+// ✓ useEffect after paint
+// ✓ useLayoutEffect before paint
+// ✓ setState creates update object
+// ✓ Keys for reconciliation
+
+
+// 👉 Mental rule:
+
+// Concurrent Mode did NOT replace React — it changed how often and when these run.
+
+// 2️⃣ SAME CONCEPTS — DIFFERENT BEHAVIOR 🔥
+
+// | Concept           | Legacy React | Concurrent React |
+// | ----------------- | ------------ | ---------------- |
+// | Render phase      | Blocking     | Interruptible    |
+// | Pause render      | ❌ No         | ✅ Yes         |
+// | Resume render     | ❌ No         | ✅ Yes         |
+// | Restart render    | ❌ No         | ✅ Yes         |
+// | Abandon render    | ❌ No         | ✅ Yes         |
+// | Guaranteed commit | ✅ Yes        | ❌ No          |
+// | Priority handling | Simple       | Lane-based       |
+// | Large renders     | UI freeze    | Yield to browser |
+
+// 3️⃣ NEW CONCEPTS — ONLY IN CONCURRENT TREE 🚀
+
+// These do not exist at all in legacy React.
+
+// NEW CONCEPTS
+// │
+// ├── Lanes (priority lanes)
+// ├── Time Slicing
+// ├── startTransition()
+// ├── useTransition
+// ├── useDeferredValue
+// ├── Suspense for data fetching
+// ├── Selective Hydration
+// ├── Offscreen API
+// ├── Render abortion
+// ├── Visibility tracking
+
+// 7️⃣ FINAL ONE-SCREEN SUMMARY 🧾
+
+// Legacy React:
+// State → Render (blocking) → Commit
+
+// Concurrent React:
+// State → Render (pause / resume / abort)
+//       → Commit (only best version)
+
+
+// Legacy React Thinking
+
+// “Once I start rendering, I must finish.”
+
+// Concurrent React Thinking
+
+// “Rendering is work. I’ll do it only when the browser has time.”
+
+
+
+
+
