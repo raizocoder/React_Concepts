@@ -3672,7 +3672,237 @@ COMMIT PHASE (Atomic & Non-Interruptible)
 
 // “Rendering is work. I’ll do it only when the browser has time.”
 
+/*           🔥 FULL CONCURRENT RENDERING ASCII TREE
 
+
+           (Scheduler → Fiber → Lanes → Render → Commit)
+
+                
+                🌍 BIG PICTURE FLOW (One Look)
+                USER EVENT / DATA CHANGE
+                        │
+                        ▼
+                  Scheduler (Priority Brain)
+                        │
+                        ▼
+                  Lanes (Priority Channels)
+                        │
+                        ▼
+                  Fiber Tree (Work Units)
+                        │
+                        ▼
+                  Render Phase (Interruptible)
+                        │
+                        ▼
+                  Commit Phase (Atomic)
+                        │
+                        ▼
+                       DOM
+                
+🧠 STEP 1 — Scheduler (Traffic Controller)
+        Scheduler
+        ├─ Immediate (Clicks, typing)
+        ├─ UserBlocking
+        ├─ Normal
+        ├─ Low
+        └─ Idle
+
+
+Job:
+
+decide what runs first
+
+pause work
+
+resume later
+
+never block the main thread
+
+⛔ Scheduler never touches DOM
+
+🧠 STEP 2 — Lanes (Priority Buckets)
+
+Think of lanes as parallel timelines.
+
+LANES:
+├─ SyncLane           (urgent)
+├─ InputLane          (typing)
+├─ TransitionLane     (startTransition)
+├─ DefaultLane
+├─ RetryLane          (Suspense retry)
+└─ IdleLane
+
+
+Each update:
+
+goes into one lane
+
+lanes can run independently
+
+higher lanes interrupt lower ones
+
+🧠 STEP 3 — Fiber Tree (Work Units)
+
+Fiber = one component = one unit of work
+
+FiberRoot
+  │
+  └─ App
+      ├─ Header
+      │   └─ Logo
+      ├─ Sidebar
+      │   └─ Menu
+      └─ Content
+          ├─ PostList
+          │   └─ PostItem
+          └─ Footer
+
+
+Each Fiber stores:
+
+props
+
+state
+
+effects
+
+lanes
+
+alternate (old fiber)
+
+🧠 STEP 4 — Double Fiber Tree (Current vs Work-In-Progress)
+CURRENT TREE        WORK-IN-PROGRESS TREE
+(UI on screen)      (being prepared)
+     │                      │
+     └────── alternate ─────┘
+
+
+React builds WIP tree off-screen.
+
+If interrupted:
+
+WIP tree is discarded
+
+current UI stays safe
+
+🧠 STEP 5 — Render Phase (Interruptible)
+Render Phase
+├─ beginWork()
+│    └─ process component
+├─ reconcile children
+├─ calculate state
+├─ mark effects
+└─ can PAUSE / ABORT / RESTART
+
+
+Important:
+
+no DOM changes
+
+may run multiple times
+
+may never finish
+
+🧠 STEP 6 — Suspense Interaction
+Component
+  └─ throws Promise
+        ├─ pause rendering
+        ├─ show fallback
+        └─ retry in RetryLane
+
+
+Suspense = cooperative pausing
+
+🧠 STEP 7 — Commit Phase (Non-Interruptible)
+Commit Phase
+├─ Before Mutation
+├─ Mutation Phase
+│    └─ DOM updates
+├─ Layout Effects
+└─ Passive Effects
+
+
+⚠️ This phase:
+
+cannot be paused
+
+must finish fully
+
+must be fast
+
+🧠 STEP 8 — Effect Execution Order
+Commit Complete
+│
+├─ useLayoutEffect (sync, blocking)
+└─ useEffect (async, after paint)
+
+
+This is why:
+
+effects are safe
+
+render is not
+
+🧠 STEP 9 — Interrupt Example (Typing During Render)
+Low Priority Render (List Filter)
+        │
+        ├─ working...
+        │
+USER TYPES
+        │
+        ▼
+High Priority Lane
+        │
+        ├─ interrupt
+        ├─ process input
+        └─ resume low work later
+
+🧠 STEP 10 — Full Combined ASCII Diagram
+[ User Event ]
+      │
+      ▼
+[ Scheduler ]
+      │
+      ▼
+[ Lane Selection ]
+      │
+      ▼
+[ Work Loop ]
+      │
+      ├─ Fiber.beginWork()
+      ├─ Can Pause
+      ├─ Can Restart
+      │
+      ▼
+[ Complete Work ]
+      │
+      ▼
+[ Commit Phase ]
+      │
+      ├─ DOM Mutations
+      ├─ Layout Effects
+      └─ Passive Effects
+      │
+      ▼
+[ Screen Update ]
+
+🧠 One Sentence to Lock It In
+
+Concurrent Rendering builds UI like a draft, throws it away if needed, and only commits when it’s safe.
+
+🔥 Senior-Level Insight
+
+Fiber = structure
+
+Lanes = priority
+
+Scheduler = decision maker
+
+Render = preparation
+
+Commit = reality
+
+*/
 
 
 
