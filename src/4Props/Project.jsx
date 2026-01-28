@@ -1,7 +1,8 @@
 const Project = ({ name }) => {
   return (
     <>
-      <h1>Hello {name}</h1>
+      <h1>Props</h1>
+      <p>Hello {name}</p>
     </>
   );
 };
@@ -37,4 +38,3 @@ export default Project;
 // | Dynamic   | `role={isAdmin?"Admin":"User"}` | `{role}`              | Computed / conditional values |
 // | Default   | `title="Hello"`                 | `{title = "Default"}` | Fallback values               |
 // | Spread    | `{...data}`                     | `{...rest}`           | Bulk props                    |
-
