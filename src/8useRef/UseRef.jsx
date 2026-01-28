@@ -23,12 +23,12 @@
 
 // export default UseStateInput;
 
-// Solution By UseRef 
+// Solution By UseRef
 
 import React, { useRef } from "react";
 
 const UseRefInput = () => {
-  const inputRef = useRef(""); // store input value
+  const inputRef = useRef(null); // store input value
   console.log("render"); // will NOT run on every keystroke
 
   const handleChange = (e) => {
