@@ -329,251 +329,251 @@ Control execution manually
 Schedule work intelligently
 
 
-___________________________🔰 PHASE 1 — WHAT IS REACT FIBER (CORE IDEA)___________________________________
+  ___________________________🔰 PHASE 1 — WHAT IS REACT FIBER (CORE IDEA)___________________________________
 
-This phase answers WHAT Fiber is, WHAT it replaced, and WHAT new powers it gave React — in the simplest possible way.
+  This phase answers WHAT Fiber is, WHAT it replaced, and WHAT new powers it gave React — in the simplest possible way.
 
-🧠 ONE-LINE DEFINITION (REMEMBER THIS)
+  🧠 ONE-LINE DEFINITION (REMEMBER THIS)
 
-React Fiber is a new internal architecture that lets React pause, resume, prioritize, and discard rendering work.
+  React Fiber is a new internal architecture that lets React pause, resume, prioritize, and discard rendering work.
 
-If you remember only one line → remember this.
+  If you remember only one line → remember this.
 
-🧩 WHAT EXACTLY CHANGED?
+  🧩 WHAT EXACTLY CHANGED?
 
-❌ Old React (Stack Reconciler)
+  ❌ Old React (Stack Reconciler)
 
-Rendering = function calls
+  Rendering = function calls
 
-Driven by JS call stack
+  Driven by JS call stack
 
-Once started → cannot stop
+  Once started → cannot stop
 
-✅ Fiber React
+  ✅ Fiber React
 
-Rendering = units of work
+  Rendering = units of work
 
-Driven by custom scheduler
+  Driven by custom scheduler
 
-Can pause, resume, reorder
+  Can pause, resume, reorder
 
-🔄 IMPORTANT: FIBER HAS TWO MEANINGS
+  🔄 IMPORTANT: FIBER HAS TWO MEANINGS
 
-1️⃣ Fiber Architecture
+  1️⃣ Fiber Architecture
 
-New reconciliation algorithm
+  New reconciliation algorithm
 
-New scheduling system
+  New scheduling system
 
-New way React thinks about rendering
+  New way React thinks about rendering
 
-2️⃣ Fiber Node
+  2️⃣ Fiber Node
 
-A plain JavaScript object
+  A plain JavaScript object
 
-Represents one component / element
+  Represents one component / element
 
-Most confusion happens here — remember this split.
+  Most confusion happens here — remember this split.
 
-🧱 WHAT IS A FIBER NODE? (VERY SIMPLE)
+  🧱 WHAT IS A FIBER NODE? (VERY SIMPLE)
 
-A Fiber node is React’s internal representation of a component.
+  A Fiber node is React’s internal representation of a component.
 
-Example:
+  Example:
 
-<App>
-  <Header />
-  <Content />
-</App>
+  <App>
+    <Header />
+    <Content />
+  </App>
 
 
-Internally becomes:
+  Internally becomes:
 
-Fiber(App)
- ├── Fiber(Header)
- └── Fiber(Content)
+  Fiber(App)
+  ├── Fiber(Header)
+  └── Fiber(Content)
 
 
-Each JSX element = one Fiber object
+  Each JSX element = one Fiber object
 
-🧠 WHY NOT USE CALL STACK ANYMORE?
+  🧠 WHY NOT USE CALL STACK ANYMORE?
 
-Because Fiber wants:
+  Because Fiber wants:
 
-Full control
+  Full control
 
-Pause at any time
+  Pause at any time
 
-Resume later
+  Resume later
 
-Stop useless work
+  Stop useless work
 
-Call stack = ❌ no control
+  Call stack = ❌ no control
 
-Fiber objects = ✅ full control
+  Fiber objects = ✅ full control
 
-🧵 FIBER = “VIRTUAL CALL STACK”
+  🧵 FIBER = “VIRTUAL CALL STACK”
 
-Think like this:
+  Think like this:
 
-Fiber is a manually controlled call stack stored in memory
+  Fiber is a manually controlled call stack stored in memory
 
-Instead of:
+  Instead of:
 
-JS Call Stack (automatic)
+  JS Call Stack (automatic)
 
 
-React uses:
+  React uses:
 
-Fiber Tree (manual)
+  Fiber Tree (manual)
 
 
-This is the core idea.
+  This is the core idea.
 
-🌳 FIBER TREE (NOT RECURSION)
+  🌳 FIBER TREE (NOT RECURSION)
 
-Fiber creates a tree using linked objects, not function calls.
+  Fiber creates a tree using linked objects, not function calls.
 
-Each Fiber has links:
+  Each Fiber has links:
 
-child   → first child
-sibling → next sibling
-return  → parent
+  child   → first child
+  sibling → next sibling
+  return  → parent
 
-Example Structure
-<App>
-  <Header />
-  <Content />
-</App>
+  Example Structure
+  <App>
+    <Header />
+    <Content />
+  </App>
 
 
-Fiber structure:
+  Fiber structure:
 
-App Fiber
- ├─ child → Header Fiber
- │      └─ sibling → Content Fiber
- └─ return → null
+  App Fiber
+  ├─ child → Header Fiber
+  │      └─ sibling → Content Fiber
+  └─ return → null
 
 
-👉 React can now move node-by-node, not stack-by-stack.
+  👉 React can now move node-by-node, not stack-by-stack.
 
-⏸️ HOW PAUSING BECOMES POSSIBLE
+  ⏸️ HOW PAUSING BECOMES POSSIBLE
 
-Because Fiber work looks like this:
+  Because Fiber work looks like this:
 
-performUnitOfWork(fiber)
+  performUnitOfWork(fiber)
 
 
-One Fiber at a time.
+  One Fiber at a time.
 
-React can say:
+  React can say:
 
-“Do Header now”
+  “Do Header now”
 
-“Pause”
+  “Pause”
 
-“Handle click”
+  “Handle click”
 
-“Resume Content”
+  “Resume Content”
 
-🔥 This was IMPOSSIBLE before.
+  🔥 This was IMPOSSIBLE before.
 
-🔁 UNIT OF WORK (VERY IMPORTANT TERM)
+  🔁 UNIT OF WORK (VERY IMPORTANT TERM)
 
-One Fiber = one unit of work
+  One Fiber = one unit of work
 
-Rendering becomes:
+  Rendering becomes:
 
-Work on Fiber A
-Pause
-Work on Fiber B
-Pause
-Work on Fiber C
+  Work on Fiber A
+  Pause
+  Work on Fiber B
+  Pause
+  Work on Fiber C
 
 
-Instead of:
+  Instead of:
 
-Do everything or die trying 😵
+  Do everything or die trying 😵
 
-🧠 WHAT POWERS DID FIBER UNLOCK?
+  🧠 WHAT POWERS DID FIBER UNLOCK?
 
-Feature	Possible Because of Fiber
+  Feature	Possible Because of Fiber
 
-Time slicing	✅
-Concurrent rendering	✅
-Suspense	✅
-Transitions	✅
-Streaming UI	✅
-Prioritized updates	✅
-Interruptible rendering	✅
+  Time slicing	✅
+  Concurrent rendering	✅
+  Suspense	✅
+  Transitions	✅
+  Streaming UI	✅
+  Prioritized updates	✅
+  Interruptible rendering	✅
 
-Fiber is the foundation, not the feature.
+  Fiber is the foundation, not the feature.
 
-🧪 SIMPLE CODE MENTAL MODEL
+  🧪 SIMPLE CODE MENTAL MODEL
 
-function renderWithFiber() {
-  while (workRemaining && !browserNeedsTime()) {
-    performNextUnitOfWork()
+  function renderWithFiber() {
+    while (workRemaining && !browserNeedsTime()) {
+      performNextUnitOfWork()
+    }
+
+    if (workRemaining) {
+      scheduleLater()
+    }
   }
 
-  if (workRemaining) {
-    scheduleLater()
-  }
-}
+
+  👉 React cooperates with browser.
+
+  ⚠️ IMPORTANT CLARIFICATION (BIG MYTH)
+
+  ❌ Fiber is NOT Virtual DOM
+  ❌ Fiber is NOT faster diffing
+  ❌ Fiber is NOT async by default
+
+  ✅ Fiber is about control & scheduling
+
+  🧠 REAL-WORLD ANALOGY
+  Old React
+
+  One long train 🚆
+
+  Can’t stop
+
+  Blocks the track
+
+  Fiber React
+
+  Many small trains 🚃🚃🚃
+
+  Can stop
+
+  Can change order
+
+  Emergency brake available
+
+  🔍 WHAT FIBER DOES NOT CHANGE
+
+  JSX syntax ❌
+
+  Component API ❌
+
+  Hooks API ❌
+
+  Fiber is internal only.
+
+  🧠 PHASE 1 SUMMARY (LOCK THIS IN)
+
+  Fiber =
+  ✔ New architecture
+  ✔ New data structure
+  ✔ Manual control over rendering
+  ✔ Pause / Resume / Priority
+  ✔ Foundation for modern React
 
 
-👉 React cooperates with browser.
+  Without Fiber:
 
-⚠️ IMPORTANT CLARIFICATION (BIG MYTH)
-
-❌ Fiber is NOT Virtual DOM
-❌ Fiber is NOT faster diffing
-❌ Fiber is NOT async by default
-
-✅ Fiber is about control & scheduling
-
-🧠 REAL-WORLD ANALOGY
-Old React
-
-One long train 🚆
-
-Can’t stop
-
-Blocks the track
-
-Fiber React
-
-Many small trains 🚃🚃🚃
-
-Can stop
-
-Can change order
-
-Emergency brake available
-
-🔍 WHAT FIBER DOES NOT CHANGE
-
-JSX syntax ❌
-
-Component API ❌
-
-Hooks API ❌
-
-Fiber is internal only.
-
-🧠 PHASE 1 SUMMARY (LOCK THIS IN)
-
-Fiber =
-✔ New architecture
-✔ New data structure
-✔ Manual control over rendering
-✔ Pause / Resume / Priority
-✔ Foundation for modern React
-
-
-Without Fiber:
-
-React 18 features would be impossible.
+  React 18 features would be impossible.
 
 
 ___________________________🔰 PHASE 2 — FIBER NODE (INTERNAL STRUCTURE DEEP DIVE)________________________
